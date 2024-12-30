@@ -1,27 +1,30 @@
+import asyncio
+import os
+
 from aiohttp import ClientSession
 from dotenv import load_dotenv
-import asyncio
 
 from block_analyzer import BlockAnalyzer
-from block_notifier import PullBlockListener, PushBlockListener
+from block_notifier import PullBlockListener
 from suspicion import SuspectedReentrancy
 
 load_dotenv()
 
-import os
 
 API_KEY = os.getenv("API_KEY")
 
 
 def pretty_print_suspicions(suspicions: list[SuspectedReentrancy]):
-    pretty_print_suspicion_format = "transaction: {trans_hash}, suspicion_level: {suspicion_level}"
+    pretty_print_suspicion_format = (
+        "transaction: {trans_hash}, suspicion_level: {suspicion_level}"
+    )
     print(
         "\n".join(
             [
                 pretty_print_suspicion_format.format(
-                    trans_hash=sus.transaction.hex(),
-                    suspicion_level=sus.type.name
-                ) for sus in suspicions
+                    trans_hash=sus.transaction.hex(), suspicion_level=sus.type.name
+                )
+                for sus in suspicions
             ]
         )
     )

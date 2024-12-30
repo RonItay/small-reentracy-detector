@@ -31,27 +31,31 @@ class BlockAnalyzer:
         # I can check for each one its codeSize, but maybe it is too slow?
         def is_smart_contract(transaction: dict):
             data: HexBytes = transaction["input"]
-            return not data == HexBytes('0x')
+            return not data == HexBytes("0x")
 
         # Type hinting seems to be broken here, in the library "transactions" is a sequence of Hexbytes,
         # but in reality it is a sequence of dictionaries
-        return [transaction for transaction in block["transactions"] if is_smart_contract(transaction)]  # ignore pep
+        return [
+            transaction
+            for transaction in block["transactions"]
+            if is_smart_contract(transaction)
+        ]  # ignore pep
 
     async def _get_debug_information_for_transaction(self, transaction) -> dict:
         params = {
             "id": 1,
             "jsonrpc": "2.0",
             "method": "debug_traceTransaction",
-            "params": ['0x' + transaction['hash'].hex(), {"tracer": "callTracer"}]
-
+            "params": ["0x" + transaction["hash"].hex(), {"tracer": "callTracer"}],
         }
         async with self._session.post(
-                self.UNSINGED_URL,
-                data=json.dumps(params)
+            self.UNSINGED_URL, data=json.dumps(params)
         ) as response:
             return await response.json()
 
-    async def _analyze_singular_transaction(self, transaction) -> SuspectedReentrancy | None:
+    async def _analyze_singular_transaction(
+        self, transaction
+    ) -> SuspectedReentrancy | None:
         debug_info = await self._get_debug_information_for_transaction(transaction)
         try:
             transaction_calls = debug_info["result"]["calls"]
@@ -71,15 +75,16 @@ class BlockAnalyzer:
 
         if suspicion_status.sus is not SuspicionType.NONE:
             return SuspectedReentrancy(
-                transaction=transaction['hash'],
-                type=suspicion_status.sus
+                transaction=transaction["hash"], type=suspicion_status.sus
             )
         else:
             return None
 
     # Recursively go over calls
     @staticmethod
-    def _analyze_call_stack(calls: list, calling_context: dict, suspicion_status: SuspicionStatus) -> None:
+    def _analyze_call_stack(
+        calls: list, calling_context: dict, suspicion_status: SuspicionStatus
+    ) -> None:
         for call in calls:
             target = call["to"]
             # extremely hideous, get the first 4 bytes (hex representation, 8 characters + 2 for '0x'), representing
@@ -97,7 +102,9 @@ class BlockAnalyzer:
                 calling_context[target] = [called_function]
 
             try:
-                BlockAnalyzer._analyze_call_stack(call["calls"], calling_context, suspicion_status)
+                BlockAnalyzer._analyze_call_stack(
+                    call["calls"], calling_context, suspicion_status
+                )
             except KeyError:
                 pass
 
@@ -109,7 +116,10 @@ class BlockAnalyzer:
         latest = self._get_latest_block()
         transactions = self._get_smart_contract_transactions(latest)
 
-        requests = [self._analyze_singular_transaction(transaction) for transaction in transactions]
+        requests = [
+            self._analyze_singular_transaction(transaction)
+            for transaction in transactions
+        ]
         suspicions = await asyncio.gather(*requests)
         suspicions = [sus for sus in suspicions if sus is not None]
 

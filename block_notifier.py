@@ -32,7 +32,9 @@ class PullBlockListener(BlockListener):
 
     async def _wait_for_new_block(self) -> int:
         while True:
-            curr_block = self._http_web3_eth.block_number  # Why is this blocking and not awaitable?
+            curr_block = (
+                self._http_web3_eth.block_number
+            )  # Why is this blocking and not awaitable?
             if curr_block != self._last_block_checked:
                 self._last_block_checked = curr_block
                 return curr_block
@@ -49,6 +51,7 @@ class PullBlockListener(BlockListener):
 # Connections seems to constantly close if you're using the unsigned API (no API key),
 # And the API to sign to subscriptions doesn't seem to be enabled for free accounts.
 
+
 # Currently this is broken, as this websocket framework doesnt really allow me to run async functions on callback.
 # There is ofcourse a way to make it work, but since the subscription service seems a bit broken - I wont work on in
 # further
@@ -56,7 +59,7 @@ class PushBlockListener(BlockListener):
     class ConnectionClosedException(Exception):
         pass
 
-    UNSIGNED_WEBSOCKET_URL = 'wss://eth.drpc.org'
+    UNSIGNED_WEBSOCKET_URL = "wss://eth.drpc.org"
 
     def __init__(self, on_new_block_callback):
         super().__init__(on_new_block_callback)
@@ -70,7 +73,7 @@ class PushBlockListener(BlockListener):
                 "jsonrpc": "2.0",
                 "method": "eth_subscribe",
                 "params": ["newHeads"],
-                "id": 1
+                "id": 1,
             }
             ws.send(json.dumps(SUBSCRIPTION_REQUEST))
 

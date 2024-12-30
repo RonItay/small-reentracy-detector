@@ -13,7 +13,9 @@ class SuspicionType(enum.IntEnum):
 
     # Order of severity: None < LIGHT < HARD
     @staticmethod
-    def get_most_severe(sus1: Optional['SuspicionType'], sus2: Optional['SuspicionType']):
+    def get_most_severe(
+        sus1: Optional["SuspicionType"], sus2: Optional["SuspicionType"]
+    ):
         return SuspicionType(max(sus1.value, sus2.value))
 
 
