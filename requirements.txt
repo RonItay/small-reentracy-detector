@@ -1,0 +1,5 @@
+aiohttp~=3.11.11
+python-dotenv~=1.0.1
+hexbytes~=1.2.1
+web3~=7.6.1
+websocket-client~=1.8.0
