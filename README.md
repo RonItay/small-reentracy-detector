@@ -1,27 +1,30 @@
 # Tiny Reentrancy detector
 
-## How is reentrancy defined
+## How is reentrancy detected
 
 ### Light reentrancy
 
 If contract A calls contract B, and in this same call B calls A.
 
-This definition leads to alot of false positives for sure.
+This detection method. leads to alot of false positives, since it is very general.
 
-### Hard
-
-If function 1 in contract A calls contract B, and in this same call function 1 of contract A is called.
+### Hard reentrancy
+Assume function a1 in contract A.
+if A.a1 call contract B, and in this same call A.a1 is called again.
 
 ## How to recognize a smart contract transaction.
 
-I recognize by seeing data being passed to the destination.
-This can lead to false positives, but this is done to save API calls to check each destination in the block.
+I recognize if a transaction is a smart contract invocation by seeing data being passed to the destination.
+This can lead to false positives, but this is done to save the API calls required to check each address in the block.
 
 ## running
+Install requirements using:
+```pip3 install -r requirements.txt```
 
-Running main.py file.
-Prints suspicious transaction's hash and their suspicion level.
+run by running main.py
+```python3 main.py```
 
+And environment variable with nad API_KEY to dRPC is required. This is a legacy requirement and can be changed.
 ## Components
 
 ### block notifier
