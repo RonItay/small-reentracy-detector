@@ -49,12 +49,12 @@ class BlockAnalyzer:
             "params": ["0x" + transaction["hash"].hex(), {"tracer": "callTracer"}],
         }
         async with self._session.post(
-            self.UNSINGED_URL, data=json.dumps(params)
+                self.UNSINGED_URL, data=json.dumps(params)
         ) as response:
             return await response.json()
 
     async def _analyze_singular_transaction(
-        self, transaction
+            self, transaction
     ) -> SuspectedReentrancy | None:
         debug_info = await self._get_debug_information_for_transaction(transaction)
         try:
@@ -83,7 +83,7 @@ class BlockAnalyzer:
     # Recursively go over calls
     @staticmethod
     def _analyze_call_stack(
-        calls: list, calling_context: dict, suspicion_status: SuspicionStatus
+            calls: list, calling_context: dict, suspicion_status: SuspicionStatus
     ) -> None:
         for call in calls:
             target = call["to"]
@@ -96,7 +96,8 @@ class BlockAnalyzer:
                     suspicion_status.found_suspicion(SuspicionType.HARD)
                 else:
                     suspicion_status.found_suspicion(SuspicionType.LIGHT)
-                    calling_context[target].append(called_function)
+
+                calling_context[target].append(called_function)
 
             except KeyError:
                 calling_context[target] = [called_function]
@@ -109,6 +110,7 @@ class BlockAnalyzer:
                 pass
 
             calling_context[target].remove(called_function)
+
             if not calling_context[target]:
                 del calling_context[target]
 
